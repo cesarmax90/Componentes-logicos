@@ -1,0 +1,669 @@
+ACT-F03 · 04 Diagramas UML — código Mermaid
+Pegar cada bloque en https://mermaid.live o en draw.io (Arrange > Insert > Advanced > Mermaid)
+
+======================================================================
+1. DIAGRAMA DE CLASES DDD — CAPA DE DOMINIO
+======================================================================
+classDiagram
+direction LR
+
+class Reservacion {
+  <<AggregateRoot>>
+  +Folio folio
+  +ClienteId clienteId
+  +SucursalId sucursalId
+  +CategoriaId categoriaReservada
+  +CategoriaId categoriaAsignada
+  +PeriodoRenta periodo
+  +EstadoReservacion estado
+  +Boolean reembolsable
+  +cancelar(ahora, rol, politica) Dinero
+  +liberarPorNoShow(ahora, politica) Dinero
+  +proponerUpgrade(politica) UpgradeOfrecido
+  +aceptarUpgrade() void
+  +rechazarUpgrade(opcion) void
+  +otorgarUpgradeCortesia(rol) void
+  +marcarConvertida() void
+}
+
+class ContratoRenta {
+  <<AggregateRoot>>
+  +ContratoId id
+  +Folio folioReservacion
+  +ClienteId clienteId
+  +VehiculoId vehiculoId
+  +CategoriaId categoriaId
+  +PeriodoRenta periodoPactado
+  +Kilometraje kmIncluidoPorDia
+  +ReferenciaPago referenciaDeposito
+  +EstadoContrato estado
+  +List~Extension~ extensiones
+  +List~ConductorAdicional~ conductores
+  +List~CoberturaSeguro~ coberturas
+  +abrir(reservacion, vehiculoId, inspeccionId, referenciaDeposito) void
+  +solicitarExtension(horas, ahora, rol, politica, hayDisponibilidad) ResultadoExtension
+  +aprobarExtension(extensionId, rol) void
+  +agregarConductor(nombre, licencia) void
+  +registrarDevolucion(ahora) VehiculoDevuelto
+  +condiciones() CondicionesContrato
+}
+
+class Extension {
+  <<Entity>>
+  +ExtensionId id
+  +Integer horasAdicionales
+  +EstadoExtension estado
+  +EmpleadoId autorizadaPor
+}
+
+class ConductorAdicional {
+  <<Entity>>
+  +String nombre
+  +Licencia licencia
+}
+
+class InspeccionVehiculo {
+  <<AggregateRoot>>
+  +InspeccionId id
+  +ContratoId contratoId
+  +VehiculoId vehiculoId
+  +TipoInspeccion tipo
+  +NivelCombustible combustible
+  +Kilometraje kilometraje
+  +List~RegistroDanio~ danios
+  +EmpleadoId realizadaPor
+  +FirmaDigital firma
+  +registrar(combustible, km, danios) void
+  +firmar(firma) void
+  +compararContra(otra) DiferenciasInspeccion
+}
+
+class Liquidacion {
+  <<AggregateRoot>>
+  +LiquidacionId id
+  +ContratoId contratoId
+  +List~Cargo~ cargos
+  +Deposito deposito
+  +EstadoLiquidacion estado
+  +calcularCargos(diferencias, condiciones, politica, ahora) CargosCalculados
+  +aprobarCargoDanio(cargoId, monto, rol) void
+  +disputarCargo(cargoId, motivo) CargoDisputado
+  +resolverDisputa(cargoId, resolucion, rol) DisputaResuelta
+  +liberarDeposito(ahora, calendario) DepositoLiberado
+  +tieneIncidencias() Boolean
+  +total() Dinero
+}
+
+class Cargo {
+  <<Entity>>
+  +CargoId id
+  +TipoCargo tipo
+  +Dinero monto
+  +EstadoCargo estado
+  +Disputa disputa
+}
+
+class Deposito {
+  <<Entity>>
+  +Dinero monto
+  +ReferenciaPago referencia
+  +Fecha retenidoEn
+  +Fecha liberadoEn
+  +EstadoDeposito estado
+}
+
+class Vehiculo {
+  <<AggregateRoot>>
+  +VehiculoId id
+  +String placa
+  +CategoriaId categoriaId
+  +SucursalId sucursalId
+  +Kilometraje odometro
+  +EstadoVehiculo estado
+  +asignarAEntrega() void
+  +marcarRentado() void
+  +registrarDevolucion(km, sucursalId) void
+  +marcarDisponible() VehiculoListoParaRenta
+}
+
+class TareaLimpieza {
+  <<AggregateRoot>>
+  +TareaId id
+  +VehiculoId vehiculoId
+  +EmpleadoId asignadaA
+  +Fecha creadaEn
+  +Fecha completadaEn
+  +asignar(empleadoId) void
+  +completar(empleadoId, ahora) TareaLimpiezaCompletada
+}
+
+class Cliente {
+  <<AggregateRoot>>
+  +ClienteId id
+  +String nombre
+  +Fecha fechaNacimiento
+  +Licencia licencia
+  +MetodoPagoRef metodoPago
+  +Boolean esFrecuente
+  +puedeRentar(hoy, tarjetaValida) Boolean
+}
+
+class CategoriaVehiculo {
+  <<AggregateRoot>>
+  +CategoriaId id
+  +String nombre
+  +Integer nivel
+  +Dinero tarifaDiaria
+  +Kilometraje kmIncluidoPorDia
+  +Dinero montoDeposito
+}
+
+class Sucursal {
+  <<AggregateRoot>>
+  +SucursalId id
+  +String nombre
+  +String ciudad
+}
+
+class Empleado {
+  <<AggregateRoot>>
+  +EmpleadoId id
+  +String nombre
+  +RolActor rol
+  +SucursalId sucursalId
+}
+
+class PeriodoRenta {
+  <<ValueObject>>
+  +Fecha inicio
+  +Fecha fin
+  +dias() Integer
+  +horasDeRetrasoContra(real) Integer
+  +extender(horas) PeriodoRenta
+}
+
+class Dinero {
+  <<ValueObject>>
+  +Decimal monto
+  +Moneda moneda
+  +sumar(otro) Dinero
+  +multiplicar(factor) Dinero
+}
+
+class Kilometraje {
+  <<ValueObject>>
+  +Integer valor
+  +restar(otro) Kilometraje
+}
+
+class NivelCombustible {
+  <<ValueObject>>
+  +Integer octavos
+  +diferenciaCon(otro) Integer
+}
+
+class Licencia {
+  <<ValueObject>>
+  +String numero
+  +Fecha vigencia
+  +estaVigente(hoy) Boolean
+}
+
+class MetodoPagoRef {
+  <<ValueObject>>
+  +String token
+  +String ultimos4
+}
+
+class ReferenciaPago {
+  <<ValueObject>>
+  +String idExterno
+}
+
+class EvidenciaFoto {
+  <<ValueObject>>
+  +String uri
+  +Fecha tomadaEn
+}
+
+class RegistroDanio {
+  <<ValueObject>>
+  +String zona
+  +String descripcion
+  +List~EvidenciaFoto~ fotos
+}
+
+class FirmaDigital {
+  <<ValueObject>>
+  +String firmante
+  +Fecha firmadaEn
+}
+
+class Disputa {
+  <<ValueObject>>
+  +String motivo
+  +Fecha abiertaEn
+  +Resolucion resolucion
+  +EmpleadoId resueltaPor
+}
+
+class CoberturaSeguro {
+  <<ValueObject>>
+  +String tipo
+  +Dinero costoDiario
+}
+
+class DiferenciasInspeccion {
+  <<ValueObject>>
+  +Kilometraje kmRecorridos
+  +Integer octavosFaltantes
+  +List~RegistroDanio~ daniosNuevos
+}
+
+class CondicionesContrato {
+  <<ValueObject>>
+  +PeriodoRenta periodoPactado
+  +Fecha devolucionReal
+  +Kilometraje kmIncluidoPorDia
+  +CategoriaId categoriaId
+}
+
+class PoliticaCancelacion {
+  <<DomainService>>
+  +horasSinPenalizacion = 24
+  +horasToleranciaNoShow = 2
+  +calcularPenalizacion(reservacion, ahora) Dinero
+}
+
+class PoliticaCargos {
+  <<DomainService>>
+  +toleranciaRetrasoMinutos = 29
+  +tarifaKmExcedente = 3 MXN
+  +toleranciaCombustibleOctavos = 1
+  +tarifaPorOctavo = por definir
+  +cargoRetraso(condiciones) Dinero
+  +cargoKmExcedente(kmRecorridos, condiciones) Dinero
+  +cargoCombustible(octavosFaltantes) Dinero
+}
+
+class PoliticaExtension {
+  <<DomainService>>
+  +limiteAgenteHoras = 48
+  +anticipacionMinimaHoras = 2
+  +evaluar(horas, ahora, vencimiento, rol, hayDisponibilidad) ResultadoExtension
+}
+
+class PoliticaUpgrade {
+  <<DomainService>>
+  +categoriaSuperiorDe(categoriaId) CategoriaId
+}
+
+class ServicioDisponibilidad {
+  <<DomainService>>
+  +hayUnidad(categoriaId, sucursalId, periodo) Boolean
+  +asignarUnidad(categoriaId, sucursalId, periodo) VehiculoId
+}
+
+class EstadoReservacion {
+  <<Enumeration>>
+  Confirmada
+  UpgradeOfrecido
+  EnListaEspera
+  Cancelada
+  LiberadaNoShow
+  Convertida
+}
+
+class EstadoVehiculo {
+  <<Enumeration>>
+  Disponible
+  Asignado
+  Rentado
+  EnLimpieza
+  EnRevision
+}
+
+class TipoCargo {
+  <<Enumeration>>
+  Danio
+  Combustible
+  KmExcedente
+  Retraso
+}
+
+class EstadoCargo {
+  <<Enumeration>>
+  Calculado
+  PendienteAprobacion
+  Disputado
+  Confirmado
+  Ajustado
+  Cancelado
+}
+
+note "Cada AggregateRoot tiene su Repositorio (interfaz en dominio, implementacion en infraestructura)"
+
+%% Composicion dentro de cada aggregate
+ContratoRenta *-- Extension
+ContratoRenta *-- ConductorAdicional
+Liquidacion *-- Cargo
+Liquidacion *-- Deposito
+
+%% Uso de Value Objects
+Reservacion --> PeriodoRenta
+Reservacion --> EstadoReservacion
+ContratoRenta --> PeriodoRenta
+ContratoRenta --> CoberturaSeguro
+ContratoRenta --> CondicionesContrato
+ContratoRenta --> ReferenciaPago
+InspeccionVehiculo --> NivelCombustible
+InspeccionVehiculo --> Kilometraje
+InspeccionVehiculo --> RegistroDanio
+InspeccionVehiculo --> FirmaDigital
+InspeccionVehiculo --> DiferenciasInspeccion : calcula
+RegistroDanio --> EvidenciaFoto
+Cargo --> Dinero
+Cargo --> Disputa
+Cargo --> TipoCargo
+Cargo --> EstadoCargo
+Deposito --> Dinero
+Cliente --> Licencia
+Cliente --> MetodoPagoRef
+CategoriaVehiculo --> Dinero
+Vehiculo --> Kilometraje
+Vehiculo --> EstadoVehiculo
+
+%% Referencias entre aggregates (solo por ID)
+Reservacion ..> Cliente : clienteId
+Reservacion ..> CategoriaVehiculo : categoriaId
+Reservacion ..> Sucursal : sucursalId
+ContratoRenta ..> Reservacion : folio
+ContratoRenta ..> Vehiculo : vehiculoId
+InspeccionVehiculo ..> ContratoRenta : contratoId
+Liquidacion ..> ContratoRenta : contratoId
+Vehiculo ..> CategoriaVehiculo : categoriaId
+Vehiculo ..> Sucursal : sucursalId
+TareaLimpieza ..> Vehiculo : vehiculoId
+Empleado ..> Sucursal : sucursalId
+
+%% Politicas usadas por los aggregates
+Reservacion ..> PoliticaCancelacion : usa
+Reservacion ..> PoliticaUpgrade : usa
+ContratoRenta ..> PoliticaExtension : usa
+Liquidacion ..> PoliticaCargos : usa
+ServicioDisponibilidad ..> Vehiculo : consulta
+
+%% Domain Events
+class ReservacionCancelada
+class UpgradeOfrecido
+class ContratoAbierto
+class RentaExtendida
+class VehiculoDevuelto
+class CargosCalculados
+class CargoDisputado
+class DisputaResuelta
+class DepositoLiberado
+class TareaLimpiezaCompletada
+class VehiculoListoParaRenta
+<<DomainEvent>> ReservacionCancelada
+<<DomainEvent>> UpgradeOfrecido
+<<DomainEvent>> ContratoAbierto
+<<DomainEvent>> RentaExtendida
+<<DomainEvent>> VehiculoDevuelto
+<<DomainEvent>> CargosCalculados
+<<DomainEvent>> CargoDisputado
+<<DomainEvent>> DisputaResuelta
+<<DomainEvent>> DepositoLiberado
+<<DomainEvent>> TareaLimpiezaCompletada
+<<DomainEvent>> VehiculoListoParaRenta
+Reservacion ..> ReservacionCancelada : emite
+Reservacion ..> UpgradeOfrecido : emite
+ContratoRenta ..> ContratoAbierto : emite
+ContratoRenta ..> RentaExtendida : emite
+ContratoRenta ..> VehiculoDevuelto : emite
+Liquidacion ..> CargosCalculados : emite
+Liquidacion ..> CargoDisputado : emite
+Liquidacion ..> DisputaResuelta : emite
+Liquidacion ..> DepositoLiberado : emite
+TareaLimpieza ..> TareaLimpiezaCompletada : emite
+Vehiculo ..> VehiculoListoParaRenta : emite
+
+======================================================================
+2. DIAGRAMA DE CLASES — CAPA DE APLICACIÓN
+======================================================================
+classDiagram
+direction LR
+
+class ReservacionAppService {
+  <<ApplicationService>>
+  +buscarDisponibilidad()
+  +crearReservacion()
+  +cancelarReservacion()
+  +liberarNoShows()
+  +responderUpgrade()
+  +otorgarUpgradeCortesia()
+  +marcarConvertida()
+}
+class EntregaAppService {
+  <<ApplicationService>>
+  +iniciarEntrega()
+}
+class InspeccionAppService {
+  <<ApplicationService>>
+  +registrarInspeccionEntrega()
+  +firmarInspeccionEntrega()
+  +registrarInspeccionDevolucion()
+  +consultarEvidenciaDisputa()
+}
+class ContratoAppService {
+  <<ApplicationService>>
+  +abrirContrato()
+  +extenderRenta()
+  +aprobarExtension()
+  +procesarDevolucion()
+}
+class LiquidacionAppService {
+  <<ApplicationService>>
+  +abrirLiquidacion()
+  +calcularCargos()
+  +aprobarCargoDanio()
+  +disputarCargo()
+  +resolverDisputa()
+  +liberarDepositos()
+}
+class FlotaAppService {
+  <<ApplicationService>>
+  +marcarRentado()
+  +registrarDevolucionVehiculo()
+  +marcarDisponible()
+  +consultarDisponibilidadFlota()
+}
+class LimpiezaAppService {
+  <<ApplicationService>>
+  +crearTarea()
+  +marcarVehiculoListo()
+}
+class ReporteAppService {
+  <<ApplicationService>>
+  +generarReporteOcupacion()
+}
+
+class RepositorioReservaciones
+class RepositorioClientes
+class RepositorioContratos
+class RepositorioInspecciones
+class RepositorioLiquidaciones
+class RepositorioVehiculos
+class RepositorioTareasLimpieza
+class PasarelaPago
+class AlmacenEvidencia
+class BusEventos
+class CalendarioHabil
+class ConsultasReportes
+<<Repository>> RepositorioReservaciones
+<<Repository>> RepositorioClientes
+<<Repository>> RepositorioContratos
+<<Repository>> RepositorioInspecciones
+<<Repository>> RepositorioLiquidaciones
+<<Repository>> RepositorioVehiculos
+<<Repository>> RepositorioTareasLimpieza
+<<Port>> PasarelaPago
+<<Port>> AlmacenEvidencia
+<<Port>> BusEventos
+<<Port>> CalendarioHabil
+<<Port>> ConsultasReportes
+
+ReservacionAppService ..> RepositorioReservaciones
+ReservacionAppService ..> RepositorioClientes
+ReservacionAppService ..> BusEventos
+EntregaAppService ..> RepositorioReservaciones
+EntregaAppService ..> RepositorioClientes
+EntregaAppService ..> RepositorioVehiculos
+EntregaAppService ..> PasarelaPago
+EntregaAppService ..> BusEventos
+InspeccionAppService ..> RepositorioInspecciones
+InspeccionAppService ..> AlmacenEvidencia
+InspeccionAppService ..> BusEventos
+ContratoAppService ..> RepositorioContratos
+ContratoAppService ..> PasarelaPago
+ContratoAppService ..> BusEventos
+LiquidacionAppService ..> RepositorioLiquidaciones
+LiquidacionAppService ..> RepositorioContratos
+LiquidacionAppService ..> RepositorioInspecciones
+LiquidacionAppService ..> PasarelaPago
+LiquidacionAppService ..> CalendarioHabil
+LiquidacionAppService ..> BusEventos
+FlotaAppService ..> RepositorioVehiculos
+FlotaAppService ..> RepositorioInspecciones
+FlotaAppService ..> BusEventos
+LimpiezaAppService ..> RepositorioTareasLimpieza
+LimpiezaAppService ..> BusEventos
+ReporteAppService ..> ConsultasReportes
+
+======================================================================
+3. DIAGRAMA DE SECUENCIA 1 — ENTREGA CON CATEGORÍA SIN UNIDAD, UPGRADE Y APERTURA DE CONTRATO
+======================================================================
+sequenceDiagram
+  autonumber
+  actor Agente
+  actor Patio as Personal de Patio
+  participant EAS as EntregaAppService
+  participant RAS as ReservacionAppService
+  participant IAS as InspeccionAppService
+  participant CAS as ContratoAppService
+  participant R as Reservacion
+  participant SD as ServicioDisponibilidad
+  participant V as Vehiculo
+  participant I as InspeccionVehiculo
+  participant C as ContratoRenta
+  participant PG as PasarelaPago
+  participant EV as BusEventos
+
+  Note over Agente,EV: Cada llamada de servicio = 1 transaccion sobre 1 aggregate
+
+  Agente->>EAS: iniciarEntrega(folio, documentos)
+  EAS->>PG: verificarTarjeta(token)
+  PG-->>EAS: tarjeta valida
+  Note right of EAS: Cliente.puedeRentar(hoy, tarjetaValida) valida licencia y edad
+  EAS->>SD: asignarUnidad(categoriaAsignada, sucursal, periodo)
+
+  alt hay unidad de la categoria reservada
+    SD-->>EAS: vehiculoId
+  else categoria sin unidad
+    SD-->>EAS: sinDisponibilidad
+    EAS->>R: proponerUpgrade(politicaUpgrade)
+    R-->>EAS: UpgradeOfrecido (categoria superior sin costo)
+    EAS->>EV: publicar(UpgradeOfrecido)
+    EAS-->>Agente: ofrecer upgrade al cliente
+    alt el cliente acepta
+      Agente->>RAS: responderUpgrade(folio, acepta)
+      RAS->>R: aceptarUpgrade()
+      Agente->>EAS: iniciarEntrega(folio, documentos)
+      EAS->>SD: asignarUnidad(categoriaSuperior, sucursal, periodo)
+      SD-->>EAS: vehiculoId
+    else el cliente rechaza
+      Agente->>RAS: responderUpgrade(folio, rechaza, listaEsperaOCancelar)
+      RAS->>R: rechazarUpgrade(opcion)
+      RAS->>EV: publicar(UpgradeRechazado)
+      RAS-->>Agente: lista de espera o cancelacion con reembolso
+      Note over Agente,RAS: El flujo termina aqui si el cliente rechaza
+    end
+  end
+
+  EAS->>V: asignarAEntrega()
+  EAS-->>Agente: unidad asignada, pasar a inspeccion
+
+  Patio->>IAS: registrarInspeccionEntrega(vehiculoId, combustible, km, danios, fotos)
+  IAS->>I: registrar(combustible, km, danios)
+  Patio->>IAS: firmarInspeccionEntrega(inspeccionId, firmaCliente)
+  IAS->>I: firmar(firma)
+  IAS->>EV: publicar(InspeccionEntregaFirmada)
+
+  Agente->>CAS: abrirContrato(folio, vehiculoId, inspeccionId)
+  CAS->>PG: retenerDeposito(token, monto)
+  PG-->>CAS: referenciaDeposito
+  CAS->>C: abrir(reservacion, vehiculoId, inspeccionId, referenciaDeposito)
+  CAS->>EV: publicar(ContratoAbierto)
+  Note over EV,R: Handlers de ContratoAbierto, cada uno en su transaccion: Reservacion pasa a Convertida, Vehiculo pasa a Rentado, se abre la Liquidacion
+  CAS-->>Agente: contrato abierto
+
+======================================================================
+4. DIAGRAMA DE SECUENCIA 2 — DEVOLUCIÓN, CÁLCULO DE CARGOS Y DISPUTA
+======================================================================
+sequenceDiagram
+  autonumber
+  actor Patio as Personal de Patio
+  actor Agente
+  actor Admin as Administracion
+  participant IAS as InspeccionAppService
+  participant CAS as ContratoAppService
+  participant LAS as LiquidacionAppService
+  participant Insp as InspeccionVehiculo
+  participant Con as ContratoRenta
+  participant Liq as Liquidacion
+  participant PC as PoliticaCargos
+  participant EV as BusEventos
+
+  Note over Patio,EV: Cada llamada de servicio = 1 transaccion sobre 1 aggregate
+
+  Patio->>IAS: registrarInspeccionDevolucion(contratoId, combustible, km, danios, fotos)
+  IAS->>Insp: registrar(combustible, km, danios)
+  IAS->>EV: publicar(InspeccionDevolucionCompletada)
+
+  Agente->>CAS: procesarDevolucion(contratoId)
+  CAS->>Con: registrarDevolucion(ahora)
+  Con-->>CAS: VehiculoDevuelto
+  CAS->>EV: publicar(VehiculoDevuelto)
+  Note over EV,LAS: Otros handlers de VehiculoDevuelto: Vehiculo pasa a EnLimpieza, se crea la TareaLimpieza
+
+  EV-->>LAS: VehiculoDevuelto
+  LAS->>Insp: compararContra(inspeccionEntrega)
+  Insp-->>LAS: DiferenciasInspeccion
+  LAS->>Liq: calcularCargos(diferencias, condiciones, politica, ahora)
+  Liq->>PC: cargoRetraso, cargoKmExcedente, cargoCombustible
+  PC-->>Liq: montos calculados
+  Liq-->>LAS: CargosCalculados
+  LAS->>EV: publicar(CargosCalculados)
+
+  alt hay cargos
+    EV-->>Agente: resumen de cargos para el cliente
+    opt hay danio nuevo
+      Admin->>LAS: aprobarCargoDanio(liquidacionId, cargoId, monto)
+      LAS->>Liq: aprobarCargoDanio(cargoId, monto, rolAdministracion)
+    end
+    opt el cliente disputa un cargo
+      Agente->>LAS: disputarCargo(liquidacionId, cargoId, motivo)
+      LAS->>Liq: disputarCargo(cargoId, motivo)
+      LAS->>EV: publicar(CargoDisputado)
+      Admin->>IAS: consultarEvidenciaDisputa(liquidacionId, cargoId)
+      IAS-->>Admin: checklists y fotos de entrega y devolucion con sello de tiempo
+      Admin->>LAS: resolverDisputa(liquidacionId, cargoId, resolucion)
+      LAS->>Liq: resolverDisputa(cargoId, resolucion, rolAdministracion)
+      LAS->>EV: publicar(DisputaResuelta)
+    end
+  else sin cargos
+    EV-->>Agente: devolucion sin incidencias
+  end
+
+  Note over LAS,Liq: Job diario liberarDepositos: a los 5 dias habiles sin incidencias, Liquidacion.liberarDeposito
+

@@ -1,0 +1,34 @@
+ACT-F03 · 02 Mapa de dominio — código Mermaid
+Pegar en https://mermaid.live o en draw.io (Arrange > Insert > Advanced > Mermaid)
+
+flowchart LR
+  Cliente[[Cliente]]
+  Reservacion[[Reservacion]]
+  Contrato[[ContratoRenta]]
+  Inspeccion[[InspeccionVehiculo]]
+  Liquidacion[[Liquidacion]]
+  Vehiculo[[Vehiculo]]
+  Tarea[[TareaLimpieza]]
+  Categoria[[CategoriaVehiculo]]
+  Sucursal[[Sucursal]]
+  Empleado[[Empleado]]
+
+  Reservacion -. clienteId .-> Cliente
+  Reservacion -. categoriaId .-> Categoria
+  Reservacion -. sucursalId .-> Sucursal
+  Contrato -. folio .-> Reservacion
+  Contrato -. vehiculoId .-> Vehiculo
+  Inspeccion -. contratoId .-> Contrato
+  Liquidacion -. contratoId .-> Contrato
+  Vehiculo -. categoriaId .-> Categoria
+  Vehiculo -. sucursalId .-> Sucursal
+  Tarea -. vehiculoId .-> Vehiculo
+  Empleado -. sucursalId .-> Sucursal
+
+  Contrato ==>|ContratoAbierto| Reservacion
+  Contrato ==>|ContratoAbierto| Vehiculo
+  Contrato ==>|ContratoAbierto| Liquidacion
+  Contrato ==>|VehiculoDevuelto| Liquidacion
+  Contrato ==>|VehiculoDevuelto| Vehiculo
+  Contrato ==>|VehiculoDevuelto| Tarea
+  Tarea ==>|TareaLimpiezaCompletada| Vehiculo
