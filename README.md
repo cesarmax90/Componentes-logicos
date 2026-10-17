@@ -1,4 +1,3 @@
-# ACT-F03-NovaRent
 # Diseño Arquitectural del Sistema - NovaRent
 
 Bienvenido al repositorio del proyecto **NovaRent**, correspondiente a la Actividad 3 de la unidad de diseño arquitectural para el curso de Componentes Lógica de Negocio.
@@ -32,14 +31,14 @@ Las políticas de negocio complejas y cambiantes (tolerancias de tiempo, cobros 
 
 El repositorio está organizado según los estándares requeridos para facilitar su revisión. A continuación, los enlaces a los entregables principales:
 
-* [**Informe de Arquitectura Completo**](./docs/ACT-F03_Diseno_Arquitectural_NovaRent1.pdf)  
-  *Nota: Puedes consultar el documento principal en la carpeta `/docs`. Este archivo contiene la justificación del patrón, mapa de dominio completo, definición de la Service Layer, separación de Command/Queries, ADRs, revisión SOLID, matriz de trazabilidad y bitácora de IA.*
+* [**Informe de Arquitectura Completo**](./ACT-F03_Diseno_Arquitectural_NovaRent1.pdf)  
+
 
 * [**Diagramas UML y de Secuencia**](./diagrams/)  
-  *Archivos fuente y exportaciones (Dominio, Clases, Secuencia de Entrega y Devolución).*
+
 
 * [**Código Base**](./src/)  
-  *Estructura de carpetas y código que refleja el Bounded Context, Aggregates, Application Services e interfaces de repositorios propuestos.*
+
 
 ## Instrucciones de Revisión
 
