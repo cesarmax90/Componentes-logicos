@@ -41,9 +41,6 @@ El repositorio está organizado según los estándares requeridos para facilitar
 * [**Código Base**](./src/)  
   *Estructura de carpetas y código que refleja el Bounded Context, Aggregates, Application Services e interfaces de repositorios propuestos.*
 
-* [**Pruebas / Escenarios**](./tests/)  
-  *(Si aplica) Casos de prueba para las políticas del dominio desconectadas de la base de datos.*
-
 ## Instrucciones de Revisión
 
 Para evaluar esta entrega, se sugiere el siguiente flujo de revisión:
